@@ -1,0 +1,63 @@
+services:
+  # --- Spark Master ---
+  spark-master:
+    container_name: spark-master
+    build: .
+    image: "spark-image:3.5.5"   
+    entrypoint: ['./entrypoint.sh', 'master']
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080" ]
+      interval: 5s
+      timeout: 5s
+      retries: 3  
+    ports:
+      - "8080:8080"
+      - "7077:7077"
+      - "4040:4040"
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+
+  # --- Spark Worker 1 ---
+  spark-worker-1:
+    container_name: spark-worker-1
+    build: .
+    image: "spark-image:3.5.5"
+    entrypoint: ['./entrypoint.sh', 'worker']
+    depends_on:
+      - spark-master
+    ports:
+      - "8088:8081" 
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_MASTER_URL=spark://spark-master:7077
+
+  # --- Spark Worker 2 ---
+  spark-worker-2:
+    container_name: spark-worker-2
+    build: .
+    image: "spark-image:3.5.5"
+    entrypoint: ['./entrypoint.sh', 'worker']
+    depends_on:
+      - spark-master
+    ports:
+      - "8089:8081" 
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+      - SPARK_MASTER_URL=spark://spark-master:7077
+  
+ # --- Spark History Server ---
+  spark-history-server:
+    container_name: spark-history
+    build: .
+    image: "spark-image:3.5.5"
+    entrypoint: ['./entrypoint.sh', 'history']
+    depends_on:
+      - spark-master
+    ports:
+      - "18080:18080" 
+    environment:
+      - SPARK_NO_DAEMONIZE=true
+
+
+
+
