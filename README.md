@@ -51,7 +51,7 @@ This will start the following services:
 
 ---
 
-## ⚖Configuration Overview
+## Configuration Overview
 
 ### spark-defaults.conf
 
